@@ -11,7 +11,7 @@ class CiweimaoParser extends Parser {
     }
 
     extractTitleImpl(dom) {
-        return dom.querySelector("h1.title"); //Need to extract span from h1 title
+        return dom.querySelector("h1.title"); //Need to remove the span element from h1.title, as it includes the author's name.
     }
 
     findContent(dom) {
@@ -19,7 +19,7 @@ class CiweimaoParser extends Parser {
     }
 
     removeUnwantedElementsFromContentElement(element) {
-        util.removeChildElementsMatchingSelector(element, "span"); //We need to remove span from every p.chapter, once we manage to get the content
+        util.removeChildElementsMatchingSelector(element, "span"); //We might need to remove span from every p.chapter, once we manage to get the content.
         super.removeUnwantedElementsFromContentElement(element);
     }
 
