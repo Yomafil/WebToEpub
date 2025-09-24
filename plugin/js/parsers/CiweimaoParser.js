@@ -24,6 +24,7 @@ class CiweimaoParser extends Parser {
         let newDom = (await HttpClient.wrapFetch("https://www.ciweimao.com/chapter/get_chapter_list_in_chapter_detail", {fetchOptions: options})).responseXML;
 
         // Because a book can be separated in volumes, we might get multiple ".book-chapter-list" each of them bound in a ".book-chapter-box" with the Volume Title stored in "h4 sub-tit"
+        // They also seems to restart the chapter count on new volume, but thats on per book basis and chapters are still properly ordered in the epub.
         let menuWrapper = document.createElement("div");
         let menu = [...newDom.querySelectorAll(".book-chapter-list")];
         menu.forEach(element => menuWrapper.appendChild(element.cloneNode(true)));
@@ -42,7 +43,7 @@ class CiweimaoParser extends Parser {
     }
 
     static linksToChapter(){
-        // Gonna grab most of this from QidianParser, because they also need to deal with Premium Chapters
+        // Gonna grab most of this from QidianParser, because they also need to deal with Premium Chapters.
     }
     */
 
@@ -100,6 +101,7 @@ class CiweimaoParser extends Parser {
         let chapter_content = document.createElement("div");
         chapter_content.textContent = json?.chapter_content; 
         // 'chapter_content' appears to be undefined, or might be removed along the way, or some other stuff that I don't know about. ¯\_(ツ)_/¯
+        // I'm probably just grabbing it wrong.
         return chapter_content;
     }
 
