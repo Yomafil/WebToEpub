@@ -32,11 +32,35 @@ class SyosetuParser extends Parser {
 
     extractPartialChapterList(dom) {
         let chapterList = dom.querySelector("div.index_box") || dom.querySelector("div.p-eplist");
-        return [...chapterList.querySelectorAll("a")].map(a => util.hyperLinkToChapter(a));
+        if (!chapterList) {
+            return [];
+        }
+        let chapters = [];
+        let arcTitle = null;
+        for (let element of chapterList.querySelectorAll(
+            ".p-eplist__chapter-title, a"
+        )) {
+            if (element.classList?.contains("p-eplist__chapter-title")) {
+                arcTitle = element.textContent.trim();
+                continue;
+            }
+            let chapter = util.hyperLinkToChapter(element);
+            if (arcTitle) {
+                chapter.newArc = arcTitle;
+                arcTitle = null;
+            }
+            chapters.push(chapter);
+        }
+        return chapters;
     }
 
     findContent(dom) {
         return dom.querySelector("div.p-novel__body");
+    }
+
+    preprocessRawDom(dom) {
+        let content = this.findContent(dom);
+        this.tagAuthorNotesBySelector(content,"div.p-novel__text--preface, div.p-novel__text--afterword");
     }
 
     extractTitleImpl(dom) {

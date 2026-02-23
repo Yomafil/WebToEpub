@@ -802,6 +802,16 @@ Don't forget to give the project a star! Thanks again!
     <li>X-Xadro</li>
     <li>Yomafil</li>
     <li>Varun Patkar</li>
+    <li>Peter Kaufman</li>
+    <li>patiorjunrick</li>
+    <li>MD Shabrez</li>
+    <li>jurassicplayer</li>
+    <li>X2E4VXpZKv</li>
+    <li>meson1271 (Parser for jadescrolls.com)</li>
+    <li>AgatZan (Parser for ficbook.net)</li>
+    <li>Joel Sunil</li>
+    <li>nothing0074</li>
+    <li>Justin Mott</li>
   </ul>
 </details>
 
