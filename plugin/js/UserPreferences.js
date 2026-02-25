@@ -103,6 +103,7 @@ class UserPreferences { // eslint-disable-line no-unused-vars
         this.removeChapterNumber = this.addPreference("removeChapterNumber", "removeChapterNumberCheckbox", false);
         this.removeOriginal = this.addPreference("removeOriginal", "removeOriginalCheckbox", true);
         this.selectTranslationAi = this.addPreference("selectTranslationAi", "selectTranslationAiCheckbox", false);
+        this.selectRetryLonger = this.addPreference("selectRetryLonger", "selectRetryLongerCheckbox", false);
         this.removeTranslated = this.addPreference("removeTranslated", "removeTranslatedCheckbox", false);
         this.skipChaptersThatFailFetch = this.addPreference("skipChaptersThatFailFetch", "skipChaptersThatFailFetchCheckbox", false);
         this.maxChaptersPerEpub = this.addPreference("maxChaptersPerEpub", "maxChaptersPerEpubTag", "10,000");
@@ -110,6 +111,8 @@ class UserPreferences { // eslint-disable-line no-unused-vars
         this.overrideMinimumDelay = this.addPreference("overrideMinimumDelay", "overrideMinimumDelayCheckbox", false);
         this.skipImages = this.addPreference("skipImages", "skipImagesCheckbox", false);
         this.compressImages = this.addPreference("compressImages", "compressImagesCheckbox", false);
+        this.compressImagesJpgCover = this.addPreference("compressImagesJpgCover", "compressImagesJpgCoverCheckbox", false);
+        this.compressImagesType = this.addPreference("compressImagesType", "compressImagesType", "jpg");
         this.compressImagesMaxResolution = this.addPreference("compressImagesMaxResolution", "compressImagesMaxResolutionTag", "1080");
         this.overwriteExistingEpub = this.addPreference("overwriteExistingEpub", "overwriteEpubWhenDuplicateFilenameCheckbox", false);
         this.themeColor = this.addPreference("themeColor", "themeColorTag", "");

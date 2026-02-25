@@ -255,8 +255,16 @@
 		"message": "Compress Images",
 		"description": "Label for checkbox and value to compress images to a certain size"
 	},
+	"__MSG_label_Compress_Images_JPG_Cover__": {
+		"message": "Restrict Cover Image to JPEG",
+		"description": "Label for JPEG cover restriction checkbox"
+	},
+	"__MSG_label_Compress_Images_Format__": {
+		"message": "Compressed Image Format",
+		"description": "Label for mime type of compressed image"
+	},
 	"__MSG_label_Compress_Images_Resolution__": {
-		"message": "Resolution",
+		"message": "Compressed Resolution",
 		"description": "Label for number input for maximum dimension size of pixel height or width in image"
 	},
 	"__MSG_label_Cover_from_URL__": {
@@ -419,6 +427,10 @@
 		"message": "Download raw (no login)",
 		"description": "Label for radio checkbox Google"
 	},
+	"__MSG_label_Select_Retry_Longer__": {
+		"message": "Retry Chapter for up to 1h (it looks like WebToEpub is stuck)",
+		"description": "Label for Retry longer"
+	},
 	"__MSG_label_Remove_Translated__": {
 		"message": "Remove Translated Text",
 		"description": "Label for checkbox to remove Translated text from chapters"
@@ -554,6 +566,10 @@
 	"__MSG_Searching_For_URLs_Please_Wait__": {
 		"message": "Searching for URLs.  Please wait.",
 		"description": "Message shown while looking for list of Chapter URLs."
+	},
+	"__MSG_option_value_auto__": {
+		"message": "auto",
+		"description": "Generic option text for 'automatic'"
 	},
 	"__MSG_Shift_Click__": {
 		"message": "You can select or unselect a range of chapters by clicking on the checkbox for the first chapter, then  hold down the shift key and click the last chapter in the range.",

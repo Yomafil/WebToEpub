@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -125,6 +125,10 @@
                 <tr id="selectTranslationAiRow" hidden="true">
                     <td><input id="selectTranslationAiCheckbox" type="checkbox" name="selectTranslationAiCheckbox" value="false"></td>
                     <td>__MSG_label_Select_Translation_Google__</td>
+                </tr>
+                <tr id="selectRetryLongerRow" hidden="true">
+                    <td><input id="selectRetryLongerCheckbox" type="checkbox" name="selectRetryLongerCheckbox" value="false"></td>
+                    <td>__MSG_label_Select_Retry_Longer__</td>
                 </tr>
                 <tr id="removeTranslatedRow" hidden="true">
                     <td><input id="removeTranslatedCheckbox" type="checkbox" name="removeTranslatedCheckbox" value="false"></td>
@@ -341,19 +345,37 @@
                     </tr>
                     <tr id="compressImagesRow">
                         <td><input id="compressImagesCheckbox" type="checkbox" name="compressImagesCheckbox" value="false"></td>
-                        <td>
-                            <table>
-                                <tr>
-                                    <td>__MSG_label_Compress_Images__</td>
-                                </tr>
-                            </table>
-                        </td>
+                        <td>__MSG_label_Compress_Images__</td>
                     </tr>
                     <tr>
-                        <td>
-                            <input id="compressImagesMaxResolutionTag" type="number" name="compressImagesMaxResolutionTag" style="width: 61px;" value="1080" min="100">
-                        </td>
-                        <td>__MSG_label_Compress_Images_Resolution__</td>
+                    <td></td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>
+                                    <input id="compressImagesMaxResolutionTag" type="number" name="compressImagesMaxResolutionTag" style="width: 61px;" value="1080" min="100">
+                                </td>
+                                <td>__MSG_label_Compress_Images_Resolution__</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <select id="compressImagesType" name="compressImagesType">
+                                        <option value="auto">__MSG_option_value_auto__</option>
+                                        <option value="jpg">jpg</option>
+                                        <option value="webp">webp</option>
+                                        <option value="png">png</option>
+                                    </select>
+                                </td>
+                                <td>__MSG_label_Compress_Images_Format__</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input id="compressImagesJpgCoverCheckbox" type="checkbox" name="compressImagesJpgCover" value="false">
+                                </td>
+                                <td>__MSG_label_Compress_Images_JPG_Cover__</td>
+                            </tr>
+                        </table>
+                    </td>
                     </tr>
                     <tr id="unSuperScriptAlternateTranslations" hidden="true">
                         <td><input id="unSuperScriptCheckboxInput" type="checkbox" name="unSuperScriptCheckboxInput" value="true"></td>
@@ -611,6 +633,7 @@
         <script src="js/parsers/BakaTsukiParser.js"></script>
         <script src="js/parsers/BakaTsukiSeriesPageParser.js"></script>
         <script src="js/parsers/BetwixtedbutterflyParser.js"></script>
+        <script src="js/parsers/BiqugetwParser.js"></script>
         <script src="js/parsers/BlogspotParser.js"></script>
         <script src="js/parsers/Book18Parser.js"></script>
         <script src="js/parsers/BookswithqianyaParser.js"></script>
@@ -635,6 +658,7 @@
         <script src="js/parsers/CoronatranslationParser.js"></script>
         <script src="js/parsers/CreativeNovelsParser.js"></script>
         <script src="js/parsers/CrimsontranslationsParser.js"></script>
+        <script src="js/parsers/CrushnovelParser.js"></script>
         <script src="js/parsers/CzbooksParser.js"></script>
         <script src="js/parsers/DaoDivineTlParser.js"></script>
         <script src="js/parsers/DarkNovelsParser.js"></script>
@@ -647,6 +671,7 @@
         <script src="js/parsers/DummynovelsParser.js"></script>
         <script src="js/parsers/EdanglarstranslationsParser.js"></script>
         <script src="js/parsers/EightMusesParser.js"></script>
+        <script src="js/parsers/EmpirenovelParser.js"></script>
         <script src="js/parsers/EngnovelParser.js"></script>
         <script src="js/parsers/ErofusParser.js"></script>
         <script src="js/parsers/EstarParser.js"></script>
@@ -657,6 +682,7 @@
         <script src="js/parsers/FastNovelParser.js"></script>
         <script src="js/parsers/FenrirealmParser.js"></script>
         <script src="js/parsers/Ffxs8Parser.js"></script>
+        <script src="js/parsers/FicbookParser.js"></script>
         <script src="js/parsers/FictioneerParser.js"></script>
         <script src="js/parsers/FictionhuntParser.js"></script>
         <script src="js/parsers/FictionManiaParser.js"></script>
@@ -674,6 +700,7 @@
         <script src="js/parsers/GoodNovelParser.js"></script>
         <script src="js/parsers/GraverobbertlParser.js"></script>
         <script src="js/parsers/GravityNovelsParser.js"></script>
+        <script src="js/parsers/GoldennovelParser.js"></script>
         <script src="js/parsers/GravityTalesParser.js"></script>
         <script src="js/parsers/GunnerkriggParser.js"></script>
         <script src="js/parsers/GutenbergDEParser.js"></script>
@@ -693,6 +720,7 @@
         <script src="js/parsers/IsotlsParser.js"></script>
         <script src="js/parsers/IxdzsParser.js"></script>
         <script src="js/parsers/JadeRabbitParser.js"></script>
+        <script src="js/parsers/JadeScrollsParser.js"></script>
         <script src="js/parsers/JaptemParser.js"></script>
         <script src="js/parsers/JjwxcParser.js"></script>
         <script src="js/parsers/JonaxxstoriesParser.js"></script>
@@ -704,8 +732,10 @@
         <script src="js/parsers/KemonopartyParser.js"></script>
         <script src="js/parsers/KrytykalParser.js"></script>
         <script src="js/parsers/LanrySpaceParser.js"></script>
+        <script src="js/parsers/LeafStudioParser.js"></script>
         <script src="js/parsers/LibersparkParser.js"></script>
         <script src="js/parsers/Libri7Parser.js"></script>
+        <script src="js/parsers/LightnovelasiaParser.js"></script>
         <script src="js/parsers/LightNovelBastionParser.js"></script>
         <script src="js/parsers/LightnovelboxParser.js"></script>
         <script src="js/parsers/LightnovelfrParser.js"></script>
@@ -715,6 +745,7 @@
         <script src="js/parsers/LightNovelWorldParser.js"></script>
         <script src="js/parsers/LiteroticaParser.js"></script>
         <script src="js/parsers/LnmtlParser.js"></script>
+        <script src="js/parsers/LoreNovelsParser.js"></script>
         <script src="js/parsers/MachineTranslationParser.js"></script>
         <script src="js/parsers/MadnovelParser.js"></script>
         <script src="js/parsers/MagicWizardsParser.js"></script>
@@ -736,6 +767,7 @@
         <script src="js/parsers/MetanovelParser.js"></script>
         <script src="js/parsers/MMyWwuxiaWorldParser.js"></script>
         <script src="js/parsers/MidnightramblesParser.js"></script>
+        <script src="js/parsers/MimihuiParser.js"></script>
         <script src="js/parsers/MtlarchiveParser.js"></script>
         <script src="js/parsers/MtledNovelsParser.js"></script>
         <script src="js/parsers/MtlnationParser.js"></script>
@@ -747,10 +779,12 @@
         <script src="js/parsers/MottruyenParser.js"></script>
         <script src="js/parsers/MuggleNetParser.js"></script>
         <script src="js/parsers/MvlempyrParser.js"></script>
+        <script src="js/parsers/MydramanovelParser.js"></script>
         <script src="js/parsers/MyxlsParser.js"></script>
         <script src="js/parsers/MznovelsParser.js"></script>
         <script src="js/parsers/NanodesuParser.js"></script>
         <script src="js/parsers/NanomashinonlineParser.js"></script>
+        <script src="js/parsers/NeobookParser.js"></script>
         <script src="js/parsers/NineHeavensParser.js"></script>
         <script src="js/parsers/NobadnovelParser.js"></script>
         <script src="js/parsers/NoblemtlParser.js"></script>
@@ -773,6 +807,7 @@
         <script src="js/parsers/NovelNaverParser.js"></script>
         <script src="js/parsers/NovelOnlineFreeParser.js"></script>
         <script src="js/parsers/NovelsfullParser.js"></script>
+        <script src="js/parsers/NovelshubParser.js"></script>
         <script src="js/parsers/NovelsOnlineParser.js"></script>
         <script src="js/parsers/NovelonomiconParser.js"></script>
         <script src="js/parsers/NovelpassionParser.js"></script>
@@ -805,6 +840,7 @@
         <script src="js/parsers/PeachpittingParser.js"></script>
         <script src="js/parsers/PeachpuffParser.js"></script>
         <script src="js/parsers/PeachygardensBlogspotParser.js"></script>
+        <script src="js/parsers/PindangscansParser.js"></script>
         <script src="js/parsers/PowanjuanParser.js"></script>
         <script src="js/parsers/PtwxzParser.js"></script>
         <script src="js/parsers/PuretlParser.js"></script>
@@ -850,6 +886,7 @@
         <script src="js/parsers/ShinsoriParser.js"></script>
         <script src="js/parsers/ShintranslationsParser.js"></script>
         <script src="js/parsers/ShirokunsParser.js"></script>
+        <script src="js/parsers/ShitouxsParser.js"></script>
         <script src="js/parsers/ShubaowbParser.js"></script>
         <script src="js/parsers/ShubaowParser.js"></script>
         <script src="js/parsers/Shw5Parser.js"></script>
@@ -857,6 +894,7 @@
         <script src="js/parsers/Sjks88Parser.js"></script>
         <script src="js/parsers/SjuukanshuParser.js"></script>
         <script src="js/parsers/SkydemonorderParser.js"></script>
+        <script src="js/parsers/SnoutandcoParser.js"></script>
         <script src="js/parsers/SoverseParser.js"></script>
         <script src="js/parsers/SpacebattlesParser.js"></script>
         <script src="js/parsers/SpiritfanfictionParser.js"></script>
@@ -876,12 +914,16 @@
         <script src="js/parsers/TitannovelParser.js"></script>
         <script src="js/parsers/ToctruyenParser.js"></script>
         <script src="js/parsers/TomotranslationsParser.js"></script>
+        <script src="js/parsers/TongrenquanParser.js"></script>
         <script src="js/parsers/TravistranslationsParser.js"></script>
         <script src="js/parsers/TruyenfullParser.js"></script>
+        <script src="js/parsers/TruyenFullVisionParser.js"></script>
         <script src="js/parsers/TruyenyyParser.js"></script>
         <script src="js/parsers/TruyenParser.js"></script>
         <script src="js/parsers/TrxsParser.js"></script>
         <script src="js/parsers/TumblrParser.js"></script>
+	    <script src="js/parsers/TwkanParser.js"></script>
+        <script src="js/parsers/UaaParser.js"></script>
         <script src="js/parsers/UltimaguilParser.js"></script>
         <script src="js/parsers/UnlimitedNovelFailuresParser.js"></script>
         <script src="js/parsers/UntamedAlleyParser.js"></script>
@@ -891,9 +933,11 @@
         <script src="js/parsers/WfxsParser.js"></script>
         <script src="js/parsers/WordexcerptParser.js"></script>
         <script src="js/parsers/WorldnovelOnlineParser.js"></script>
+        <script src="js/parsers/WtnovelsParser.js"></script>
         <script src="js/parsers/XiaoshuoguiParser.js"></script>
         <script src="js/parsers/XiaxuenovelsParser.js"></script>
         <script src="js/parsers/XklxswParser.js"></script>
+        <script src="js/parsers/YedugeParser.js"></script>
         <script src="js/parsers/YushuboParser.js"></script>
         <script src="js/parsers/AsianHobbyistParser.js"></script>
         <script src="js/parsers/FoxaholicParser.js"></script>

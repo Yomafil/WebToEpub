@@ -33,19 +33,9 @@ class HelheimscansParser extends Parser {
     }
 
     preprocessRawDom(dom) {
-        let realURL = "";
-        let imgs = [...dom.querySelectorAll("#pages img")];
-        if (imgs.length != 0) {
-            try {
-                let script = dom.querySelector("#pages script");
-                realURL = script.textContent.match("realUrl = .*?;")[0];
-                realURL = realURL.replace("realUrl = `","").replace("${uid}`;","");
-            } catch (error) {
-                realURL = "https://image.meowing.org/uploads/";
-            }       
-        }
+        let imgs = [...dom.querySelectorAll("#pages img.lazy[uid]")];
         for (let img of imgs) {
-            img.src = realURL+img?.attributes?.uid?.textContent;
+            img.src = `https://image.meowing.org/uploads/${img.getAttribute("uid")}`;
         }
     }
 
@@ -66,6 +56,12 @@ class HelheimscansParser extends Parser {
     }
 
     getInformationEpubItemChildNodes(dom) {
-        return [...dom.querySelectorAll("#expand_content")];
+        let meta = dom.querySelector("meta[name='description']");
+        if (meta) {
+            let p = dom.createElement("p");
+            p.textContent = meta.getAttribute("content");
+            return [p];
+        }
+        return [];
     }
 }

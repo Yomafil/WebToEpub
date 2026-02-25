@@ -31,6 +31,11 @@ class ReadingList {
         return false;
     }
 
+    setEpub(url, chapterURL) {
+        this.epubs.set(url, chapterURL);
+        this.writeToLocalStorage();
+    }
+
     getEpub(url) {
         return this.epubs.get(url);
     }
