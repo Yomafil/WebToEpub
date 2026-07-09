@@ -597,9 +597,17 @@ class Parser {
             pageParser.preprocessRawDom(webPageDom);
             pageParser.removeUnusedElementsToReduceMemoryConsumption(webPageDom);
             let content = pageParser.findContent(webPage.rawDom);
+            //TO BE REMOVED - DEBUGING
+            content = null;
             if (content == null) {
-                let errorMsg = UIText.Error.errorContentNotFound(webPage.sourceUrl);
-                throw new Error(errorMsg);
+                if (this.userPreferences.noContentToChallengePage.value) {
+                    let errorMsg = UIText.Warning.warning403ErrorResponse(webPage.hostname);
+                    throw new Error(errorMsg);
+                }
+                else {
+                    let errorMsg = UIText.Error.errorContentNotFound(webPage.sourceUrl);
+                    throw new Error(errorMsg);
+                }
             }
             return pageParser.fetchImagesUsedInDocument(content, webPage);
         } catch (error) {
