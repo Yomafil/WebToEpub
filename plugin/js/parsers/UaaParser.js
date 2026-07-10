@@ -18,6 +18,17 @@ class UaaParser extends Parser {
         return dom.querySelector(".article");
     }
 
+    customRawDomToContentStep(chapter, content) {
+        [...content.querySelectorAll("div.line")]
+            .forEach(this.divToP);
+    }
+
+    divToP(div) {
+        let p = document.createElement("p");
+        p.textContent = div.textContent;
+        div.replaceWith(p);
+    }
+
     removeUnwantedElementsFromContentElement(element) {
         util.removeChildElementsMatchingSelector(element, ".dizhi");
         super.removeUnwantedElementsFromContentElement(element);
@@ -28,11 +39,13 @@ class UaaParser extends Parser {
     }
 
     findCoverImageUrl(dom) {
-        return util.getFirstImgSrc(dom, ".cover"); // Cover Image is hidden being an API call. 
+        return util.getFirstImgSrc(dom, ".novel_box");
     }
 
-    extractLanguage(dom) {
-        return dom.querySelector("html").getAttribute("lang");
+    extractSubject(dom) {
+        let genres = [...dom.querySelectorAll("div.item:nth-child(5) a")];
+        let tags = [...dom.querySelectorAll(".tag_box li a")];
+        return [...genres, ...tags].map(e => e.textContent).join(", ");
     }
 
     extractTitleImpl(dom) {
@@ -40,7 +53,7 @@ class UaaParser extends Parser {
     }
 
     extractAuthor(dom) {
-        let authorLabel = dom.querySelector(".info_box > div:nth-child(4) > a:nth-child(1)");
+        let authorLabel = dom.querySelector(".info_box > div:nth-child(4) a");
         return authorLabel?.textContent ?? super.extractAuthor(dom);
     }
 

@@ -109,6 +109,11 @@ class NovelfullParser extends Parser {
     }
 
     extractPartialChapterList(dom) {
+        if (!dom.querySelector("ul")) {
+            let templateElement = dom.querySelector("template");
+            return [...templateElement.content.querySelectorAll("li a")]
+                .map(link => util.hyperLinkToChapter(link));
+        }
         return [...dom.querySelectorAll("ul.list-chapter a")]
             .map(link => util.hyperLinkToChapter(link));
     }
@@ -255,6 +260,10 @@ class NovelbinParser extends NovelfullParser {
         let genres = [...dom.querySelectorAll(".info > li:nth-child(2) a")];
         let tags = [...dom.querySelectorAll(".tag-container a")];
         return [...genres, ...tags].map(e => e.textContent).join(", ");
+    }
+
+    extractPublisher() {
+        return "NovelBin";
     }
 
     removeUnwantedElementsFromContentElement(element) {

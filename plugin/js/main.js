@@ -79,6 +79,7 @@ var main = (function() {
         setUiFieldToValue("fileNameInput", metaInfo.fileName);
         setUiFieldToValue("subjectInput", metaInfo.subject);
         setUiFieldToValue("descriptionInput", metaInfo.description);
+        setUiFieldToValue("publisherInput", metaInfo.publisher);
         if (metaInfo.seriesName !== null) {
             document.getElementById("seriesRow").hidden = false;
             document.getElementById("volumeRow").hidden = false;
@@ -108,6 +109,7 @@ var main = (function() {
         metaInfo.fileName = getValueFromUiField("fileNameInput");
         metaInfo.subject = getValueFromUiField("subjectInput");
         metaInfo.description = getValueFromUiField("descriptionInput");
+        metaInfo.publisher = getValueFromUiField("publisherInput");
 
         if (document.getElementById("seriesRow").hidden === false) {
             metaInfo.seriesName = getValueFromUiField("seriesNameInput");
@@ -135,6 +137,7 @@ var main = (function() {
         if (document.getElementById("noAdditionalMetadataCheckbox").checked == true) {
             setUiFieldToValue("subjectInput", "");
             setUiFieldToValue("descriptionInput", "");
+            setUiFieldToValue("publisherInput", "");
         }
         let metaInfo = metaInfoFromControls();
 
@@ -616,6 +619,17 @@ var main = (function() {
 
     // actions to do when window opened
     window.onload = async () => {
+        if (typeof DOMPurify === "undefined" || typeof zip === "undefined") {
+            let msg = "Error: WebToEpub is missing required third-party dependencies (DOMPurify or zip.js).\n\nIf you are running from a git clone, please run 'npm install' in the project root to fetch these dependencies.";
+            alert(msg);
+            let pleaseWait = document.getElementById("findingChapterUrlsMessageRow");
+            if (pleaseWait) {
+                pleaseWait.textContent = msg;
+                pleaseWait.style.color = "red";
+                pleaseWait.hidden = false;
+            }
+            return;
+        }
         userPreferences = UserPreferences.readFromLocalStorage();
         if (isRunningInTabMode()) { 
             ErrorLog.SuppressErrorLog =  false;
@@ -637,6 +651,7 @@ var main = (function() {
         onLoadAndAnalyseButtonClick : onLoadAndAnalyseButtonClick,
         fetchContentAndPackEpub: fetchContentAndPackEpub,
         resetUI: resetUI,
+        getCurrentParser: () => parser,
         getUserPreferences: () => userPreferences,
     };
 })();
