@@ -654,7 +654,13 @@ class Parser {
 
     // Hook if need to chase hyperlinks in page to get all chapter content
     async fetchChapter(url) {
-        return (await HttpClient.wrapFetch(url)).responseXML;
+        if (this.userPreferences.noContentToError403.value) {
+            let options = { parser: this };
+            return (await HttpClient.wrapFetch(url, options)).responseXML;
+        }
+        else {
+            return (await HttpClient.wrapFetch(url)).responseXML;
+        }
     }
 
     updateReadingList() {
