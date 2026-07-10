@@ -76,23 +76,40 @@ class Parser {
     
     //Use this option if the parser isn't sending the correct HTTP header
     isCustomError(response) {  // eslint-disable-line no-unused-vars
-        return false;
+        if (this.userPreferences.noContentToError403.value) {
+            let content = this.findContent(response.responseXML);
+            return (content == null);
+        }
+        else {
+            return false;    
+        }
     }
 
     setCustomErrorResponse(url, wrapOptions, checkedresponse) {
-        //example
-        let ret = {};
-        ret.url = url;
-        ret.wrapOptions = wrapOptions;
-        ret.response = {};
-        //URL that's get opened on 'Open URL for Captcha' click
-        ret.response.url = checkedresponse.response.url;
-        ret.response.status = 403;
-        //How often should it be retried and with how much delay in between
-        ret.response.retryDelay = [80,40,20,10,5];
-        ret.errorMessage = "This is a custom error message that will be displayed should all retries fail";
-        //return empty to throw error
-        return {};
+        if (this.userPreferences.noContentToError403.value) {
+            let ret = {};
+            ret.url = url;
+            ret.wrapOptions = wrapOptions;
+            ret.response = {};
+            ret.response.url = checkedresponse.response.url;
+            ret.response.status = 403;
+            return ret;
+        }
+        else {
+            //example
+            let ret = {};
+            ret.url = url;
+            ret.wrapOptions = wrapOptions;
+            ret.response = {};
+            //URL that's get opened on 'Open URL for Captcha' click
+            ret.response.url = checkedresponse.response.url;
+            ret.response.status = 403;
+            //How often should it be retried and with how much delay in between
+            ret.response.retryDelay = [80,40,20,10,5];
+            ret.errorMessage = "This is a custom error message that will be displayed should all retries fail";
+            //return empty to throw error
+            return {};
+        }        
     }
 
     onUserPreferencesUpdate(userPreferences) {
@@ -597,17 +614,9 @@ class Parser {
             pageParser.preprocessRawDom(webPageDom);
             pageParser.removeUnusedElementsToReduceMemoryConsumption(webPageDom);
             let content = pageParser.findContent(webPage.rawDom);
-            //TO BE REMOVED - DEBUGING
-            content = null;
             if (content == null) {
-                if (this.userPreferences.noContentToChallengePage.value) {
-                    let errorMsg = UIText.Warning.warning403ErrorResponse(webPage.hostname);
-                    throw new Error(errorMsg);
-                }
-                else {
-                    let errorMsg = UIText.Error.errorContentNotFound(webPage.sourceUrl);
-                    throw new Error(errorMsg);
-                }
+                let errorMsg = UIText.Error.errorContentNotFound(webPage.sourceUrl);
+                throw new Error(errorMsg);
             }
             return pageParser.fetchImagesUsedInDocument(content, webPage);
         } catch (error) {
@@ -642,7 +651,13 @@ class Parser {
 
     // Hook if need to chase hyperlinks in page to get all chapter content
     async fetchChapter(url) {
-        return (await HttpClient.wrapFetch(url)).responseXML;
+        if (this.userPreferences.noContentToError403.value) {
+            let options = { parser: this };
+            return (await HttpClient.wrapFetch(url, options)).responseXML;
+        }
+        else {
+            return (await HttpClient.wrapFetch(url)).responseXML;
+        }
     }
 
     updateReadingList() {
