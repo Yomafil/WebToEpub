@@ -618,8 +618,14 @@ class Parser {
             pageParser.removeUnusedElementsToReduceMemoryConsumption(webPageDom);
             let content = pageParser.findContent(webPage.rawDom);
             if (content == null) {
-                let errorMsg = UIText.Error.errorContentNotFound(webPage.sourceUrl);
-                throw new Error(errorMsg);
+                if (this.userPreferences.noContentToError403.value) {
+                    let errorMsg = UIText.Warning.warning403ErrorResponse(new URL(webPage.sourceUrl).hostname);
+                    throw new Error(errorMsg);
+                }
+                else {
+                    let errorMsg = UIText.Error.errorContentNotFound(webPage.sourceUrl);
+                    throw new Error(errorMsg);
+                }
             }
             return pageParser.fetchImagesUsedInDocument(content, webPage);
         } catch (error) {
