@@ -76,40 +76,43 @@ class Parser {
     
     //Use this option if the parser isn't sending the correct HTTP header
     isCustomError(response) {  // eslint-disable-line no-unused-vars
+        return false;    
+    }
+
+    setCustomErrorResponse(url, wrapOptions, checkedresponse) {
+        //example
+        let ret = {};
+        ret.url = url;
+        ret.wrapOptions = wrapOptions;
+        ret.response = {};
+        //URL that's get opened on 'Open URL for Captcha' click
+        ret.response.url = checkedresponse.response.url;
+        ret.response.status = 403;
+        //How often should it be retried and with how much delay in between
+        ret.response.retryDelay = [80,40,20,10,5];
+        ret.errorMessage = "This is a custom error message that will be displayed should all retries fail";
+        //return empty to throw error
+        return {};
+    }
+
+    isNoContentToError403AndContentNull(response) {
         if (this.userPreferences.noContentToError403.value) {
             let content = this.findContent(response.responseXML);
             return (content == null);
         }
         else {
-            return false;    
+            return false;
         }
     }
 
-    setCustomErrorResponse(url, wrapOptions, checkedresponse) {
-        if (this.userPreferences.noContentToError403.value) {
-            let ret = {};
-            ret.url = url;
-            ret.wrapOptions = wrapOptions;
-            ret.response = {};
-            ret.response.url = checkedresponse.response.url;
-            ret.response.status = 403;
-            return ret;
-        }
-        else {
-            //example
-            let ret = {};
-            ret.url = url;
-            ret.wrapOptions = wrapOptions;
-            ret.response = {};
-            //URL that's get opened on 'Open URL for Captcha' click
-            ret.response.url = checkedresponse.response.url;
-            ret.response.status = 403;
-            //How often should it be retried and with how much delay in between
-            ret.response.retryDelay = [80,40,20,10,5];
-            ret.errorMessage = "This is a custom error message that will be displayed should all retries fail";
-            //return empty to throw error
-            return {};
-        }        
+    setNoContentToError403Response(url, wrapOptions, checkedresponse) {
+        let ret = {};
+        ret.url = url;
+        ret.wrapOptions = wrapOptions;
+        ret.response = {};
+        ret.response.url = checkedresponse.response.url;
+        ret.response.status = 403;
+        return ret;
     }
 
     onUserPreferencesUpdate(userPreferences) {
