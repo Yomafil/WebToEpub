@@ -1,3 +1,5 @@
+"use strict";
+
 parserFactory.register("www.ciweimao.com", () => new CiweimaoParser());
 
 class CiweimaoParser extends Parser {
@@ -128,7 +130,7 @@ class CiweimaoParser extends Parser {
             //free
             let chapterAjaxKeyJson = (await HttpClient.fetchJson("https://www.ciweimao.com/chapter/ajax_get_session_code", options)).json; 
             if (chapterAjaxKeyJson.code != 100000) {
-                throw new Error(chapterAjaxKeyJson.code + " " + chapterAjaxKeyJson.chapter_access_key);
+                throw new Error("Failed with error code: " + chapterAjaxKeyJson.code);
             }
 
             let chapterAccessKey = chapterAjaxKeyJson.chapter_access_key;
@@ -140,7 +142,7 @@ class CiweimaoParser extends Parser {
 
             let chapterDetailJson = (await HttpClient.fetchJson("https://www.ciweimao.com/chapter/get_book_chapter_detail_info", options)).json;
             if (chapterDetailJson.code != 100000) {
-                throw new Error(chapterDetailJson.code + " " + chapterDetailJson.tip);
+                throw new Error("Failed with error code: " + chapterDetailJson.code);
             }
 
             chapterJson = { ...chapterDetailJson, chapterAccessKey};
@@ -216,6 +218,20 @@ class CiweimaoParser extends Parser {
     extractAuthor(dom) {
         let authorLabel = dom.querySelector("h1.title > span");
         return authorLabel?.textContent ?? super.extractAuthor(dom);
+    }
+
+    extractSubject(dom) {
+        let tags = [...dom.querySelectorAll(".label-box span")];
+
+        if (tags[0].textContent.trim() === "暂无标签") {//No tags available
+            return "";
+        }
+
+        return tags.map(e => e.textContent.trim()).join(", ");
+    }
+
+    extractDescription(dom) {
+        return dom.querySelector(".book-desc").textContent.trim();
     }
 
     extractPublisher() {
