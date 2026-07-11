@@ -50,8 +50,8 @@ class CiweimaoParser extends Parser {
             return true; //locked
         } 
         else if (link.querySelector(".icon-unlock")) {
-            this.lockedChapterIds.add(this.getChapterId(link.href));
-            return false; //unlocked img
+            //this.lockedChapterIds.add(this.getChapterId(link.href));
+            return true; //unlocked chapter img, not implemented
         } 
         else {
             return false; //free
@@ -123,11 +123,11 @@ class CiweimaoParser extends Parser {
 
         let chapterJson;
         if (this.imgChapterIds.has(chapterId)) {
-            //unlock img
+            //unlock chapter img, not implemented
             chapterJson = (await HttpClient.fetchJson("https://www.ciweimao.com/chapter/ajax_get_image_session_code", options)).json;
         }
         else {
-            //free
+            //free chapter
             let chapterAjaxKeyJson = (await HttpClient.fetchJson("https://www.ciweimao.com/chapter/ajax_get_session_code", options)).json; 
             if (chapterAjaxKeyJson.code != 100000) {
                 throw new Error("Failed with error code: " + chapterAjaxKeyJson.code);
@@ -155,7 +155,7 @@ class CiweimaoParser extends Parser {
         let newDoc = Parser.makeEmptyDocForContent(url);
         let chapterId = this.getChapterId(url);
 
-        //unlocked img
+        //unlocked chapter img, not implemented
         if (this.imgChapterIds.has(chapterId)) {
             let heightUrl = new URL("https://www.ciweimao.com/chapter/get_book_chapter_image_height");
             let options = {
@@ -179,27 +179,29 @@ class CiweimaoParser extends Parser {
             img.src = imageUrl.href;
             newDoc.content.appendChild(img);
         }
-        //free
+        //free chapter
         else {
             let chapterText = chapterJson.chapter_content;
             let encryptKeys = chapterJson.encryt_keys;
             let chapterAccessKey = chapterJson.chapterAccessKey;
 
+            let disclaimerDiv = newDoc.dom.createElement("div");
+            disclaimerDiv.id = "disclaimer";
+            disclaimerDiv.textContent = "Warning: Chapters need postprocessing using https://dteviot.github.io/EpubEditor/ browser tool. Navigate to the address, Drag and drop your epub file in the Drop Zone, and click on the 'decrypt Ciweimao epub chapters' button. Or use the Ciweimao-EpubEditor-Companion-Script provided at https://github.com/Yomafil/EpubEditor-Companion-Scripts, by inputing it's content in the text area beside the Drop Zone, and clicking on the 'Run async script' button.";
+            newDoc.content.appendChild(disclaimerDiv);
+
             let chapterContentDiv = newDoc.dom.createElement("div");
             chapterContentDiv.id = "chapter-content";
-            chapterContentDiv.setAttribute("data-type", "chapter-content");
             chapterContentDiv.textContent = chapterText;
             newDoc.content.appendChild(chapterContentDiv);
 
             let chapterEncryptKeysDiv = newDoc.dom.createElement("div");
             chapterEncryptKeysDiv.id = "chapter-encryption-keys";
-            chapterEncryptKeysDiv.setAttribute("data-type", "chapter-encryption-keys");
             chapterEncryptKeysDiv.textContent = encryptKeys;
             newDoc.content.appendChild(chapterEncryptKeysDiv);
 
             let chapterAccessKeyDiv = newDoc.dom.createElement("div");
             chapterAccessKeyDiv.id = "chapter-access-key";
-            chapterAccessKeyDiv.setAttribute("data-type", "chapter-access-key");
             chapterAccessKeyDiv.textContent = chapterAccessKey;
             newDoc.content.appendChild(chapterAccessKeyDiv);
         }
