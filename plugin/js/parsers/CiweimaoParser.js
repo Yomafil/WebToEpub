@@ -9,10 +9,6 @@ class CiweimaoParser extends Parser {
         this.imgChapterIds = new Set();
     }
 
-    //Make the first few page of the epub a tutorial on how to decrypt the epub after download?
-    // Or a link to a github page with a readme
-    // at least put the information somewhere in the epub, with an easy step by step
-
     async getChapterUrls(dom) {
         let payload = new URLSearchParams();
         payload.append("book_id", this.getBookId(dom));
