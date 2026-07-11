@@ -3,7 +3,7 @@ parserFactory.register("www.ciweimao.com", () => new CiweimaoParser());
 class CiweimaoParser extends Parser {
     constructor() {
         super();
-        this.minimumThrottle = 1500;
+        this.minimumThrottle = 3000;
         this.imgChapterIds = new Set();
     }
 
@@ -36,14 +36,14 @@ class CiweimaoParser extends Parser {
             return {
                 sourceUrl: link.href,
                 title: link.textContent.trim(),
-                isIncludeable: this.isLocked(link),
+                isIncludeable: !this.isLocked(link),
             };
         });
 
         return chapters;
     }
 
-    static isLocked(link) {
+    isLocked(link) {
         if (link.querySelector(".icon-lock")) {
             return true; //locked
         } 
@@ -181,25 +181,25 @@ class CiweimaoParser extends Parser {
         else {
             let chapterText = chapterJson.chapter_content;
             let encryptKeys = chapterJson.encryt_keys;
-            let chapterAccessKey = chapterJson.chapter_access_key;
+            let chapterAccessKey = chapterJson.chapterAccessKey;
 
-            let tmpDiv = newDoc.dom.createElement("div");
-            tmpDiv.innerHTML = chapterText;
-            while (tmpDiv.firstChild) {
-                newDoc.content.appendChild(tmpDiv.firstChild);
-            }
+            let chapterContentDiv = newDoc.dom.createElement("div");
+            chapterContentDiv.id = "chapter-content";
+            chapterContentDiv.setAttribute("data-type", "chapter-content");
+            chapterContentDiv.textContent = chapterText;
+            newDoc.content.appendChild(chapterContentDiv);
 
-            let encryptKeyDiv = newDoc.dom.createElement("div");
-            encryptKeyDiv.innerHTML = encryptKeys;
-            while (encryptKeyDiv.firstChild) {
-                newDoc.content.appendChild(encryptKeyDiv.firstChild);
-            }
+            let chapterEncryptKeysDiv = newDoc.dom.createElement("div");
+            chapterEncryptKeysDiv.id = "chapter-encryption-keys";
+            chapterEncryptKeysDiv.setAttribute("data-type", "chapter-encryption-keys");
+            chapterEncryptKeysDiv.textContent = encryptKeys;
+            newDoc.content.appendChild(chapterEncryptKeysDiv);
 
             let chapterAccessKeyDiv = newDoc.dom.createElement("div");
-            chapterAccessKeyDiv.innerHTML = chapterAccessKey;
-            while (chapterAccessKeyDiv.firstChild) {
-                newDoc.content.appendChild(chapterAccessKeyDiv.firstChild);
-            }
+            chapterAccessKeyDiv.id = "chapter-access-key";
+            chapterAccessKeyDiv.setAttribute("data-type", "chapter-access-key");
+            chapterAccessKeyDiv.textContent = chapterAccessKey;
+            newDoc.content.appendChild(chapterAccessKeyDiv);
         }
 
         return newDoc.dom;
