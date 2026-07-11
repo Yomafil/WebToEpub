@@ -183,7 +183,7 @@ class CiweimaoParser extends Parser {
 
             let disclaimerDiv = newDoc.dom.createElement("div");
             disclaimerDiv.id = "disclaimer";
-            disclaimerDiv.textContent = "Warning: Chapters need postprocessing using https://dteviot.github.io/EpubEditor/ browser tool. Navigate to the address, Drag and drop your epub file in the Drop Zone, and click on the 'decrypt Ciweimao epub chapters' button. Or use the Ciweimao-EpubEditor-Companion-Script provided at https://github.com/Yomafil/EpubEditor-Companion-Scripts, by inputing it's content in the text area beside the Drop Zone, and clicking on the 'Run async script' button.";
+            disclaimerDiv.textContent = "Warning: Chapters need postprocessing using https://dteviot.github.io/EpubEditor/ browser tool. Navigate to the address, Drag and drop your epub file in the Drop Zone, and use the Ciweimao-EpubEditor-Companion-Script provided at https://github.com/Yomafil/EpubEditor-Companion-Scripts, by inputing it's content in the text area beside the Drop Zone, and clicking on the 'Run async script' button.";
             newDoc.content.appendChild(disclaimerDiv);
 
             let chapterContentDiv = newDoc.dom.createElement("div");
