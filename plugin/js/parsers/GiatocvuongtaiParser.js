@@ -64,24 +64,87 @@ class GiatocvuongtaiParser extends Parser {
 
         let title = newDoc.dom.createElement("h2");
         title.textContent = chapterJson.data.title;
-
         newDoc.content.appendChild(title);
 
         chapterJson.data.content.blocks.forEach((block) => {
-            if (block.type === "paragraph") {
-                let p = newDoc.dom.createElement("p");
+            if (block.type === "image" && block.image) {
+                let figure = newDoc.dom.createElement("figure");
+                let img = newDoc.dom.createElement("img");
+                img.src = block.image.publicUrl;
+                if (block.image.alt) {
+                    img.alt = block.image.alt;
+                }
+                figure.appendChild(img);
 
-                p.textContent = block.inline.map(item => item.text).join("");
+                if (block.image.caption) {
+                    let figcaption = newDoc.dom.createElement("figcaption");
+                    figcaption.textContent = block.image.caption;
+                    figure.appendChild(figcaption);
+                }
+                newDoc.content.appendChild(figure);
+                return;
+            }
 
-                newDoc.content.appendChild(p);
+            if (block.type === "paragraph" && block.inline) {
+                let runsForCurrentP = [];
+
+                let flush = () => {
+                    if (runsForCurrentP.length === 0) {
+                        return;
+                    }
+                    let p = newDoc.dom.createElement("p");
+                    runsForCurrentP.forEach((run) => {
+                        p.appendChild(this.renderRun(newDoc.dom, run));
+                    });
+                    newDoc.content.appendChild(p);
+                    runsForCurrentP = [];
+                }
+
+                block.inline.forEach((item) => {
+                    let lines = (item.text || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").split(/\n+/);
+
+                    lines.forEach((line, i) => {
+                        if (i > 0) {
+                            flush();
+                        }
+                        if (line.length > 0) {
+                            runsForCurrentP.push({ text: line, marks: item.marks });
+                        }
+                    });
+                });
+
+                flush();
             }
         });
 
         return newDoc.dom;
     }
 
+    renderRun(dom, run) {
+        let node = dom.createTextNode(run.text);
+        if (!run.marks || run.marks.length === 0) {
+            return node;
+        }
+
+        let wrappedNode = node;
+        run.marks.forEach((mark) => {
+            let tag;
+            switch (mark) {
+                case "bold":            tag = "strong"; break;
+                case "italic":          tag = "em"; break;
+                case "underline":       tag = "u"; break;
+                case "strikethrough":   tag = "s"; break;
+                case "code":            tag = "code"; break;
+            }
+            let el = dom.createElement(tag);
+            el.appendChild(wrappedNode);
+            wrappedNode = el;
+        });
+        return wrapped;
+    }
+
     findContent(dom) {
-        return dom.querySelector("div");
+        return Parser.findConstrutedContent(dom);
     }
 
     extractTitleImpl(dom) {
