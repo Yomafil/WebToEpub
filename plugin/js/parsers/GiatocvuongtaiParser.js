@@ -5,10 +5,15 @@ class GiatocvuongtaiParser extends Parser {
         super();
     }
 
+    populateUIImpl() {
+        document.getElementById("removeChapterNumberRow").hidden = false; 
+    }
+
     async getChapterUrls(dom) {
         let storyIdentifierContainer = dom.querySelector("astro-island[props]");
         let props = JSON.parse(storyIdentifierContainer.getAttribute("props"));
         let initialStoryIdentifier = props.initialStoryIdentifier?.[1];
+        let removeChapNum = document.getElementById("removeChapterNumberCheckbox").checked;
 
         let options = {
             method: "GET",
@@ -29,7 +34,7 @@ class GiatocvuongtaiParser extends Parser {
         let chapterLinks = chapterListJson.data.chapters.map((chapter) => {
             return {
                 sourceUrl: `https://giatocvuongtai.com/reader/?storyId=${storyId}&chapter=${chapter.id}`,
-                title: chapter.title,
+                title: removeChapNum ? chapter.title : `${chapter.order_number} ${chapter.title}`,
                 isIncludeable: !chapter.is_password_protected,
             };
         });
@@ -67,6 +72,7 @@ class GiatocvuongtaiParser extends Parser {
         newDoc.content.appendChild(title);
 
         chapterJson.data.content.blocks.forEach((block) => {
+            //untested
             if (block.type === "image" && block.image) {
                 let figure = newDoc.dom.createElement("figure");
                 let img = newDoc.dom.createElement("img");
@@ -124,7 +130,8 @@ class GiatocvuongtaiParser extends Parser {
         return newDoc.dom;
     }
 
-    static applyMarks(dom, paragraph) {
+    //untested
+    applyMarks(dom, paragraph) {
         let node = dom.createTextNode(paragraph.text);
         if (!paragraph.marks || paragraph.marks.length === 0) {
             return node;
@@ -144,7 +151,7 @@ class GiatocvuongtaiParser extends Parser {
             el.appendChild(wrappedNode);
             wrappedNode = el;
         });
-        return wrapped;
+        return wrappedNode;
     }
 
     findContent(dom) {
