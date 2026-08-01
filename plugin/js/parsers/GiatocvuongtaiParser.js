@@ -86,48 +86,52 @@ class GiatocvuongtaiParser extends Parser {
             }
 
             if (block.type === "paragraph" && block.inline) {
-                let runsForCurrentP = [];
-
-                let flush = () => {
-                    if (runsForCurrentP.length === 0) {
-                        return;
-                    }
-                    let p = newDoc.dom.createElement("p");
-                    runsForCurrentP.forEach((run) => {
-                        p.appendChild(this.renderRun(newDoc.dom, run));
-                    });
-                    newDoc.content.appendChild(p);
-                    runsForCurrentP = [];
-                }
+                let paragraphList = [];
 
                 block.inline.forEach((item) => {
                     let lines = (item.text || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").split(/\n+/);
 
                     lines.forEach((line, i) => {
                         if (i > 0) {
-                            flush();
+                            if (paragraphList.length === 0) {
+                                return;
+                            }
+                            let p = newDoc.dom.createElement("p");
+                            paragraphList.forEach((paragraph) => {
+                                p.appendChild(this.applyMarks(newDoc.dom, paragraph));
+                            });
+                            newDoc.content.appendChild(p);
+                            paragraphList = [];
                         }
                         if (line.length > 0) {
-                            runsForCurrentP.push({ text: line, marks: item.marks });
+                            paragraphList.push({ text: line, marks: item.marks });
                         }
                     });
                 });
 
-                flush();
+                if (paragraphList.length === 0) {
+                    return;
+                }
+                let p = newDoc.dom.createElement("p");
+                paragraphList.forEach((paragraph) => {
+                    p.appendChild(this.applyMarks(newDoc.dom, paragraph));
+                });
+                newDoc.content.appendChild(p);
+                paragraphList = [];
             }
         });
 
         return newDoc.dom;
     }
 
-    renderRun(dom, run) {
-        let node = dom.createTextNode(run.text);
-        if (!run.marks || run.marks.length === 0) {
+    static applyMarks(dom, paragraph) {
+        let node = dom.createTextNode(paragraph.text);
+        if (!paragraph.marks || paragraph.marks.length === 0) {
             return node;
         }
 
         let wrappedNode = node;
-        run.marks.forEach((mark) => {
+        paragraph.marks.forEach((mark) => {
             let tag;
             switch (mark) {
                 case "bold":            tag = "strong"; break;
