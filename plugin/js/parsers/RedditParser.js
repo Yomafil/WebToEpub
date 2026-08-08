@@ -1,6 +1,9 @@
 "use strict";
 
-parserFactory.register("reddit.com", () => new RedditParser());
+parserFactory.registerUrlRule(
+    url => RedditParser.urlMeetsSelectionCriteria(url), 
+    () => new RedditParser()
+);
 
 class RedditParser extends Parser {
     constructor() {
@@ -28,6 +31,23 @@ class RedditParser extends Parser {
 
     static getPost(dom) {
         return dom.querySelector("main shreddit-post");
+    }
+
+    static urlMeetsSelectionCriteria(url) {
+        try {
+            let parsedUrl = new URL(url);
+
+            //match if url is: reddit.com/r/.*/comments/
+            //see `SubredditParser`
+            if (!/^\/r\/[^/]+\/comments\/.+/.test(parsedUrl.pathname)) {
+                return false; 
+            }
+
+            let hostname = parsedUrl.hostname;
+            return (hostname === "www.reddit.com" || hostname === "reddit.com");
+        } catch (e) {
+            return false;
+        }
     }
 
     findChapterTitle(dom) {
