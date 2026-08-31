@@ -3,58 +3,76 @@
 parserFactory.register("www.ciweimao.com", () => new CiweimaoParser());
 
 class CiweimaoParser extends Parser {
+    static BASE_URL = "https://www.ciweimao.com";
+
     constructor() {
         super();
-        this.minimumThrottle = 3000;
-        this.imgChapterIds = new Set();
+        this.minimumThrottle = 1500;
+        this.lockedChapterIds = new Set();
     }
 
     async getChapterUrls(dom) {
-        let payload = new URLSearchParams();
-        payload.append("book_id", this.getBookId(dom));
-        payload.append("chapter_id", 0);
-        payload.append("orderby", 0);
-
-        let options = {
+        const payload = {
+            book_id: this.getBookId(dom),
+            chapter_id: "0",
+            orderby: "0",
+        };
+        const options = {
             method: "POST",
             credentials: "include",
-            body: payload
+            body: new URLSearchParams(payload),
         };
+        const newDom = (
+            await HttpClient.wrapFetch(
+                `${CiweimaoParser.BASE_URL}/chapter/get_chapter_list_in_chapter_detail`,
+                { fetchOptions: options }
+            )
+        ).responseXML;
 
-        let newDom = (await HttpClient.wrapFetch("https://www.ciweimao.com/chapter/get_chapter_list_in_chapter_detail", {fetchOptions: options})).responseXML;
+        const menuWrapper = document.createElement("div");
+        const chapterLists = newDom.querySelectorAll(".book-chapter-list");
+        chapterLists.forEach((element) =>
+            menuWrapper.appendChild(element.cloneNode(true))
+        );
 
-        let menuWrapper = document.createElement("div");
-        let menu = [...newDom.querySelectorAll(".book-chapter-list")];
-        menu.forEach((element) => menuWrapper.appendChild(element.cloneNode(true)));
+        this.lockedChapterIds.clear();
+        const chapterLinks = [
+            ...menuWrapper.querySelectorAll("a[href*='/chapter/']"),
+        ];
 
-        this.imgChapterIds.clear();
-        let chapterLinks = [ ...menuWrapper.querySelectorAll("a[href*='/chapter']"),];
+        const chapters = chapterLinks.map((link) => {
+            const sourceUrl = link.href;
+            const title = link.textContent.trim();
 
-        let chapters = chapterLinks.map((link) => {
-            return {
-                sourceUrl: link.href,
-                title: link.textContent.trim(),
-                isIncludeable: !this.isLocked(link),
-            };
+            if (link.querySelector(".icon-lock")) {
+                // locked
+                return {
+                    sourceUrl,
+                    title,
+                    isIncludeable: false,
+                };
+            } else if (link.querySelector(".icon-unlock")) {
+                // accessable but img chapter
+                const chapterId = this.getChapterId(sourceUrl);
+                this.lockedChapterIds.add(chapterId);
+                return {
+                    sourceUrl,
+                    title,
+                };
+            } else {
+                // free chatper
+                return {
+                    sourceUrl,
+                    title,
+                };
+            }
         });
 
         return chapters;
     }
 
-    isLocked(link) {
-        if (link.querySelector(".icon-lock")) {
-            return true; //locked
-        } 
-        else if (link.querySelector(".icon-unlock")) {
-            //this.lockedChapterIds.add(this.getChapterId(link.href));
-            return true; //unlocked chapter img, not implemented
-        } 
-        else {
-            return false; //free
-        }
-    }
-
     getBookId(dom) {
+        // book ID is the last part of the path in the base URI
         return dom.baseURI.split("/").pop();
     }
 
@@ -63,7 +81,8 @@ class CiweimaoParser extends Parser {
     }
 
     extractTitleImpl(dom) {
-        let title = dom.querySelector("h1.title");
+        // rm the author's name (in a span) from the main title
+        const title = dom.querySelector("h1.title");
         const clone = title.cloneNode(true);
         clone.querySelector("span")?.remove();
         return clone;
@@ -71,12 +90,13 @@ class CiweimaoParser extends Parser {
 
     findContent(dom) {
         return dom.querySelector("div");
+        // We can also have images in the encrypted chapter_content.
+        // The content is in "#J_BookRead"
     }
 
     async fetchChapter(url) {
-        let chapterId = this.getChapterId(url);
-
-        let rules = [
+        const chapterId = this.getChapterId(url);
+        const rules = [
             {
                 id: 1,
                 priority: 1,
@@ -86,127 +106,188 @@ class CiweimaoParser extends Parser {
                         {
                             header: "referer",
                             operation: "set",
-                            value: url,
+                            value: `${CiweimaoParser.BASE_URL}/chapter/${chapterId}`,
                         },
                         {
                             header: "origin",
                             operation: "set",
-                            value: "https://www.ciweimao.com",
+                            value: CiweimaoParser.BASE_URL,
                         },
                     ],
                 },
                 condition: {
-                    urlFilter: "*://www.ciweimao.com/*",
+                    urlFilter: `*://${
+                        new URL(CiweimaoParser.BASE_URL).hostname
+                    }/*`,
                 },
             },
         ];
 
         await HttpClient.setDeclarativeNetRequestRules(rules);
 
-        let payload = new URLSearchParams();
-        payload.append("chapter_id", chapterId);
-
-        let options = {
+        let chapterJson;
+        const payload = new URLSearchParams({ chapter_id: chapterId });
+        const postOptions = {
             method: "POST",
             credentials: "include",
             headers: {
-                "Accept": "application/json, text/javascript, */*; q=0.01",
-                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                Accept: "application/json, text/javascript, */*; q=0.01",
                 "X-Requested-With": "XMLHttpRequest",
             },
-            body: payload.toString()
+            body: payload,
         };
 
-        let chapterJson;
-        if (this.imgChapterIds.has(chapterId)) {
-            //unlock chapter img, not implemented
-            chapterJson = (await HttpClient.fetchJson("https://www.ciweimao.com/chapter/ajax_get_image_session_code", options)).json;
+        if (this.lockedChapterIds.has(chapterId)) {
+            // locked (image)
+            chapterJson = (
+                await HttpClient.fetchJson(
+                    `${CiweimaoParser.BASE_URL}/chapter/ajax_get_image_session_code`,
+                    postOptions
+                )
+            ).json;
+        } else {
+            // unlocked (text)
+            const { chapter_access_key } = (
+                await HttpClient.fetchJson(
+                    `${CiweimaoParser.BASE_URL}/chapter/ajax_get_session_code`,
+                    postOptions
+                )
+            ).json;
+
+            payload.append("chapter_access_key", chapter_access_key);
+            const chapterDetailJson = (
+                await HttpClient.fetchJson(
+                    `${CiweimaoParser.BASE_URL}/chapter/get_book_chapter_detail_info`,
+                    postOptions
+                )
+            ).json;
+
+            chapterJson = { ...chapterDetailJson, chapter_access_key };
         }
-        else {
-            //free chapter
-            let chapterAjaxKeyJson = (await HttpClient.fetchJson("https://www.ciweimao.com/chapter/ajax_get_session_code", options)).json; 
-            if (chapterAjaxKeyJson.code != 100000) {
-                throw new Error("Failed with error code: " + chapterAjaxKeyJson.code);
-            }
 
-            let chapterAccessKey = chapterAjaxKeyJson.chapter_access_key;
-            payload = new URLSearchParams();
-            payload.append("chapter_id", chapterId);
-            payload.append("chapter_access_key", chapterAjaxKeyJson.chapter_access_key);
-
-            options.body = payload.toString();
-
-            let chapterDetailJson = (await HttpClient.fetchJson("https://www.ciweimao.com/chapter/get_book_chapter_detail_info", options)).json;
-            if (chapterDetailJson.code != 100000) {
-                throw new Error("Failed with error code: " + chapterDetailJson.code);
-            }
-
-            chapterJson = { ...chapterDetailJson, chapterAccessKey};
-        }
-
-        return this.buildEncryptedChapter(chapterJson, url);
+        return this.buildChapter(chapterJson, url);
     }
 
-    async buildEncryptedChapter(chapterJson, url) {
-        let newDoc = Parser.makeEmptyDocForContent(url);
-        let chapterId = this.getChapterId(url);
-
-        //unlocked chapter img, not implemented
-        if (this.imgChapterIds.has(chapterId)) {
-            let heightUrl = new URL("https://www.ciweimao.com/chapter/get_book_chapter_image_height");
-            let options = {
-                chapter_id: chapterId,
-                area_width: 871,
-                font: "undefined",
-                font_size: 16,
-                bg_color_name: "white",
-                text_color_name: "white",
-            };
-            heightUrl.search = new URLSearchParams(options).toString();
-            await HttpClient.wrapFetch(heightUrl.href);
-
-            let imageUrl = new URL("https://www.ciweimao.com/chapter/book_chapter_image");
-            imageUrl.search = new URLSearchParams({
-                ...options,
-                image_code: chapterJson.image_code,
-            }).toString();
-
-            let img = newDoc.dom.createElement("img");
-            img.src = imageUrl.href;
-            newDoc.content.appendChild(img);
+    _base64ToArrayBuffer(base64) {
+        const binary_string = atob(base64);
+        const len = binary_string.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i);
         }
-        //free chapter
-        else {
-            let chapterText = chapterJson.chapter_content;
-            let encryptKeys = chapterJson.encryt_keys;
-            let chapterAccessKey = chapterJson.chapterAccessKey;
+        return bytes.buffer;
+    }
 
-            let disclaimerDiv = newDoc.dom.createElement("div");
-            disclaimerDiv.id = "disclaimer";
-            disclaimerDiv.textContent = "Warning: Chapters need postprocessing using https://dteviot.github.io/EpubEditor/ browser tool. Navigate to the address, Drag and drop your epub file in the Drop Zone, and use the Ciweimao-EpubEditor-Companion-Script provided at https://github.com/Yomafil/EpubEditor-Companion-Scripts, by inputing it's content in the text area beside the Drop Zone, and clicking on the 'Run async script' button.";
-            newDoc.content.appendChild(disclaimerDiv);
+    async _decryptChapterContentNative({ content, keys, accessKey }) {
+        const keysLength = keys.length;
+        const decryptionKeysB64 = [];
+        decryptionKeysB64.push(
+            keys[accessKey.charCodeAt(accessKey.length - 1) % keysLength]
+        );
+        decryptionKeysB64.push(keys[accessKey.charCodeAt(0) % keysLength]);
 
-            let chapterContentDiv = newDoc.dom.createElement("div");
-            chapterContentDiv.id = "chapter-content";
-            chapterContentDiv.textContent = chapterText;
-            newDoc.content.appendChild(chapterContentDiv);
+        let currentContentB64 = content;
+        let finalDecryptedBuffer;
 
-            let chapterEncryptKeysDiv = newDoc.dom.createElement("div");
-            chapterEncryptKeysDiv.id = "chapter-encryption-keys";
-            chapterEncryptKeysDiv.textContent = encryptKeys;
-            newDoc.content.appendChild(chapterEncryptKeysDiv);
+        for (const keyB64 of decryptionKeysB64) {
+            const keyData = this._base64ToArrayBuffer(keyB64);
+            const cryptoKey = await crypto.subtle.importKey(
+                "raw",
+                keyData,
+                { name: "AES-CBC" },
+                false, // not extractable
+                ["decrypt"]
+            );
 
-            let chapterAccessKeyDiv = newDoc.dom.createElement("div");
-            chapterAccessKeyDiv.id = "chapter-access-key";
-            chapterAccessKeyDiv.textContent = chapterAccessKey;
-            newDoc.content.appendChild(chapterAccessKeyDiv);
+            const rawContentBuffer =
+                this._base64ToArrayBuffer(currentContentB64);
+            const iv = rawContentBuffer.slice(0, 16);
+            const ciphertext = rawContentBuffer.slice(16);
+            const decryptedBuffer = await crypto.subtle.decrypt(
+                { name: "AES-CBC", iv: iv },
+                cryptoKey,
+                ciphertext
+            );
+
+            currentContentB64 = new TextDecoder("latin1").decode(
+                decryptedBuffer
+            );
+            finalDecryptedBuffer = decryptedBuffer;
+        }
+
+        return new TextDecoder("utf-8").decode(finalDecryptedBuffer);
+    }
+
+    async buildChapter(json, url) {
+        const newDoc = Parser.makeEmptyDocForContent(url);
+        const chapterId = this.getChapterId(url);
+
+        // locked image
+        if (this.lockedChapterIds.has(chapterId)) {
+            if (json.image_code && json.encryt_keys && json.access_key) {
+                // trigger server to gen full-height img
+                const heightUrl = new URL(
+                    `${CiweimaoParser.BASE_URL}/chapter/get_book_chapter_image_height`
+                );
+                // todo: tune
+                const imageOptions = {
+                    chapter_id: chapterId,
+                    area_width: 871,
+                    font: "undefined",
+                    font_size: 16,
+                    bg_color_name: "white",
+                    text_color_name: "white",
+                };
+                heightUrl.search = new URLSearchParams(imageOptions).toString();
+                await HttpClient.wrapFetch(heightUrl.href); // don't need the resp
+
+                const decryptedImageCode =
+                    await this._decryptChapterContentNative({
+                        content: json.image_code,
+                        keys: json.encryt_keys,
+                        accessKey: json.access_key,
+                    });
+
+                const imageUrl = new URL(
+                    `${CiweimaoParser.BASE_URL}/chapter/book_chapter_image`
+                );
+                imageUrl.search = new URLSearchParams({
+                    ...imageOptions,
+                    image_code: decryptedImageCode.trim(),
+                }).toString();
+
+                const img = newDoc.dom.createElement("img");
+                img.src = imageUrl.href;
+                newDoc.content.appendChild(img);
+            }
+            // unlocked text
+        } else if (
+            json.chapter_content &&
+            json.encryt_keys &&
+            json.chapter_access_key
+        ) {
+            const chapterText = await this._decryptChapterContentNative({
+                content: json.chapter_content,
+                keys: json.encryt_keys,
+                accessKey: json.chapter_access_key,
+            });
+            const tmpDiv = newDoc.dom.createElement("div");
+            tmpDiv.innerHTML = chapterText;
+            while (tmpDiv.firstChild) {
+                newDoc.content.appendChild(tmpDiv.firstChild);
+            }
+        } else {
+            const p = newDoc.dom.createElement("p");
+            p.textContent = "Chapter content couldn't be loaded";
+            newDoc.content.appendChild(p);
+
         }
 
         return newDoc.dom;
     }
 
     findCoverImageUrl(dom) {
-        return util.getFirstImgSrc(dom, "div.cover"); 
+        return util.getFirstImgSrc(dom, "div.cover");
     }
 
     extractLanguage() {
