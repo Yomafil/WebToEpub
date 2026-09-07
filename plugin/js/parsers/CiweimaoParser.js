@@ -9,6 +9,8 @@ class CiweimaoParser extends Parser {
         super();
         this.minimumThrottle = 1500;
         this.lockedChapterIds = new Set();
+        // Will break if `maxSimultanousFetchSize` is changed. A Map might be better.
+        this.chapterFetchAttempt = 0;
     }
 
     async getChapterUrls(dom) {
@@ -72,7 +74,6 @@ class CiweimaoParser extends Parser {
     }
 
     getBookId(dom) {
-        // book ID is the last part of the path in the base URI
         return dom.baseURI.split("/").pop();
     }
 
@@ -81,7 +82,6 @@ class CiweimaoParser extends Parser {
     }
 
     extractTitleImpl(dom) {
-        // rm the author's name (in a span) from the main title
         const title = dom.querySelector("h1.title");
         const clone = title.cloneNode(true);
         clone.querySelector("span")?.remove();
@@ -89,9 +89,7 @@ class CiweimaoParser extends Parser {
     }
 
     findContent(dom) {
-        return dom.querySelector("div");
-        // We can also have images in the encrypted chapter_content.
-        // The content is in "#J_BookRead"
+        return Parser.findConstructedContent(dom);
     }
 
     async fetchChapter(url) {
@@ -259,28 +257,37 @@ class CiweimaoParser extends Parser {
                 const img = newDoc.dom.createElement("img");
                 img.src = imageUrl.href;
                 newDoc.content.appendChild(img);
+                this.chapterFetchAttempt = 0;
             }
             // unlocked text
-        } else if (
-            json.chapter_content &&
-            json.encryt_keys &&
-            json.chapter_access_key
-        ) {
+        } else if ( json.chapter_content && json.encryt_keys && json.chapter_access_key) {
             const chapterText = await this._decryptChapterContentNative({
                 content: json.chapter_content,
                 keys: json.encryt_keys,
                 accessKey: json.chapter_access_key,
             });
+
             const tmpDiv = newDoc.dom.createElement("div");
             tmpDiv.innerHTML = chapterText;
             while (tmpDiv.firstChild) {
                 newDoc.content.appendChild(tmpDiv.firstChild);
             }
-        } else {
-            const p = newDoc.dom.createElement("p");
-            p.textContent = "Chapter content couldn't be loaded";
-            newDoc.content.appendChild(p);
 
+            this.chapterFetchAttempt = 0;
+        } else {
+            // retry fetching chapter n times
+            if (this.chapterFetchAttempt < 10) {
+                console.log(`Retry fetch of chapter ${url}`);
+                this.chapterFetchAttempt += 1;
+                await this.rateLimitDelay();
+                return this.fetchChapter(url);
+            }
+            else {
+                const p = newDoc.dom.createElement("p");
+                p.textContent = `Chapter content couldn't be loaded\n\n chapter content: ${json.chapter_content}\n encryption keys: ${json.encryt_keys}\n access key: ${json.chapter_access_key}`;
+                newDoc.content.appendChild(p);
+                this.chapterFetchAttempt = 0;
+            }
         }
 
         return newDoc.dom;
