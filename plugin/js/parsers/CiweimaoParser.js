@@ -261,30 +261,30 @@ class CiweimaoParser extends Parser {
             }
             // unlocked text
         } else if ( json.chapter_content && json.encryt_keys && json.chapter_access_key) {
-            const chapterText = await this._decryptChapterContentNative({
+            let chapterText = await this._decryptChapterContentNative({
                 content: json.chapter_content,
                 keys: json.encryt_keys,
                 accessKey: json.chapter_access_key,
             });
 
+            chapterText = chapterText.replaceAll("1vp0aX", "");
+
             const tmpDiv = newDoc.dom.createElement("div");
-            tmpDiv.innerHTML = chapterText;
+            tmpDiv.textContent = chapterText;
             while (tmpDiv.firstChild) {
                 newDoc.content.appendChild(tmpDiv.firstChild);
             }
 
             this.chapterFetchAttempt = 0;
         } else {
-            // retry fetching chapter n times
-            if (this.chapterFetchAttempt < 10) {
-                console.log(`Retry fetch of chapter ${url}`);
+            if (this.chapterFetchAttempt < 5) {
                 this.chapterFetchAttempt += 1;
                 await this.rateLimitDelay();
                 return this.fetchChapter(url);
             }
             else {
                 const p = newDoc.dom.createElement("p");
-                p.textContent = `Chapter content couldn't be loaded\n\n chapter content: ${json.chapter_content}\n encryption keys: ${json.encryt_keys}\n access key: ${json.chapter_access_key}`;
+                p.textContent = `Chapter content couldn't be loaded.\n\n chapter content: ${json.chapter_content}\n encryption keys: ${json.encryt_keys}\n access key: ${json.chapter_access_key}`;
                 newDoc.content.appendChild(p);
                 this.chapterFetchAttempt = 0;
             }
