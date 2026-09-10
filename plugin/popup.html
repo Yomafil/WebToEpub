@@ -10,6 +10,9 @@
 </head>
 <body>
     <div class="container">
+        <section id="extensionVersionSection">
+            <span id="spanExtensionVersion"></span>
+        </section>
         <section id="readingListSection" hidden="true">
             <button id="closeReadingList">__MSG_button_Close_ReadingList__</button>
             <table id="readingListTable">
@@ -45,6 +48,7 @@
                     <td>__MSG_label_Default_Parser_Test_Chapter_Url__</td>
                     <td>
                         <input id="defaultParserTestChapterUrl" type="text" name="defaultParserTestChapterUrlInput" size="30" value="" />
+                        <span id="smartDetectStatus" style="font-size:12px; margin-left:8px;"></span>
                     </td>
                 </tr>
                 <tr>
@@ -626,6 +630,7 @@
         <script src="js/Firefox.js"></script>
         <script src="js/Download.js"></script>
         <script src="js/HttpClient.js"></script>
+        <script src="js/HeuristicScanner.js"></script>
         <script src="js/EpubItem.js"></script>
         <script src="js/ParserFactory.js"></script>
         <script src="js/ImageCollector.js"></script>
@@ -858,6 +863,7 @@
         <script src="js/parsers/NovelholdParser.js"></script>
         <script src="js/parsers/NovelightParser.js"></script>
         <script src="js/parsers/NovelinguaParser.js"></script>
+        <script src="js/parsers/NovelLunarParser.js"></script>
         <script src="js/parsers/NovelmaoParser.js"></script>
         <script src="js/parsers/NovelmaniaParser.js"></script>
         <script src="js/parsers/NovelmediumParser.js"></script>
