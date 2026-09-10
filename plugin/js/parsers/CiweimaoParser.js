@@ -270,7 +270,7 @@ class CiweimaoParser extends Parser {
             chapterText = chapterText.replaceAll("1vp0aX", "");
 
             const tmpDiv = newDoc.dom.createElement("div");
-            tmpDiv.textContent = chapterText;
+            tmpDiv.innerHTML = chapterText;
             while (tmpDiv.firstChild) {
                 newDoc.content.appendChild(tmpDiv.firstChild);
             }
