@@ -11,6 +11,7 @@ class CiweimaoParser extends Parser {
         this.lockedChapterIds = new Set();
         // Will break if `maxSimultanousFetchSize` is changed. A Map might be better.
         this.chapterFetchAttempt = 0;
+        this.retryRateLimit = 0;
     }
 
     async getChapterUrls(dom) {
@@ -258,6 +259,7 @@ class CiweimaoParser extends Parser {
                 img.src = imageUrl.href;
                 newDoc.content.appendChild(img);
                 this.chapterFetchAttempt = 0;
+                this.retryRateLimit = 0;
             }
             // unlocked text
         } else if ( json.chapter_content && json.encryt_keys && json.chapter_access_key) {
@@ -276,10 +278,12 @@ class CiweimaoParser extends Parser {
             }
 
             this.chapterFetchAttempt = 0;
+            this.retryRateLimit = 0;
         } else {
             if (this.chapterFetchAttempt < 5) {
                 this.chapterFetchAttempt += 1;
-                await this.rateLimitDelay();
+                this.retryRateLimit += this.minimumThrottle;
+                await util.sleep(this.retryRateLimit);
                 return this.fetchChapter(url);
             }
             else {
@@ -287,6 +291,7 @@ class CiweimaoParser extends Parser {
                 p.textContent = `Chapter content couldn't be loaded.\n\n chapter content: ${json.chapter_content}\n encryption keys: ${json.encryt_keys}\n access key: ${json.chapter_access_key}`;
                 newDoc.content.appendChild(p);
                 this.chapterFetchAttempt = 0;
+                this.retryRateLimit = 0;
             }
         }
 
