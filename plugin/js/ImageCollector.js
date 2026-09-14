@@ -100,11 +100,14 @@ class ImageCollector {
         return this.imagesToFetch.length;
     }
 
-    async fetchImages(progressIndicator, parentPageUrl) {
+    async fetchImages(progressIndicator, webPage) {
         for (let imageInfo of this.imagesToFetch) {
             if (!imageInfo.queuedForFetch) {
+                if (this.userPreferences.rateLimitImages) {
+                    await webPage.parser.rateLimitDelay();
+                }
                 imageInfo.queuedForFetch = true;
-                await this.fetchImage(imageInfo, progressIndicator, parentPageUrl);
+                await this.fetchImage(imageInfo, progressIndicator, webPage.sourceUrl);
             }
         }
         this.imagesToFetch = [];

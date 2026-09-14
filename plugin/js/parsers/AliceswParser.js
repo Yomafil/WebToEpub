@@ -71,4 +71,8 @@ class AliceswParser extends Parser {
         newresp.response.status = 403;
         return newresp;
     }
+
+    getInformationEpubItemChildNodes(dom) {
+        return [...dom.querySelectorAll(".box_intro, .jianjie, #posts")];
+    }
 }
