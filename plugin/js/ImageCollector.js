@@ -100,9 +100,12 @@ class ImageCollector {
         return this.imagesToFetch.length;
     }
 
-    async fetchImages(progressIndicator, parentPageUrl) {
+    async fetchImages(progressIndicator, parentPageUrl, webPage) {
         for (let imageInfo of this.imagesToFetch) {
             if (!imageInfo.queuedForFetch) {
+                if (this.userPreferences.rateLimitImages) {
+                    await webPage.parser.rateLimitDelay();
+                }
                 imageInfo.queuedForFetch = true;
                 await this.fetchImage(imageInfo, progressIndicator, parentPageUrl);
             }

@@ -479,6 +479,10 @@
 		"message": "Skip Images",
 		"description": "Label for checkbox to not include images in EPUB"
 	},
+	"__MSG_label_Rate_Limit_Images__": {
+		"message": "Rate Limit Fetching of Images",
+		"description": "Label for checkbox to rate limit when fetching images used in EPUB."
+	},
 	"__MSG_label_Starting_URL__": {
 		"message": "Starting URL",
 		"description": "Label in front of 'URL' input"

@@ -402,6 +402,7 @@ class BakaTsukiParser extends Parser {
     fetchContent() {
         this.rebuildImagesToFetch();
         this.setUiToShowLoadingProgress(this.imageCollector.numberOfImagesToFetch());
+        //Need check for regression
         return this.imageCollector.fetchImages(() => this.updateProgressBarOneStep(), this.state.firstPageDom.baseURI)
             .then(function() {
                 main.getPackEpubButton().disabled = false;

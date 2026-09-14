@@ -660,9 +660,9 @@ class Parser {
     }
 
     async fetchImagesUsedInDocument(content, webPage) {
-        let revisedContent = await this.imageCollector.preprocessImageTags(content, webPage.sourceUrl);
+        let revisedContent = await this.imageCollector.preprocessImageTags(content, webPage.sourceUrl, webPage);
         this.imageCollector.findImagesUsedInDocument(revisedContent);
-        await this.imageCollector.fetchImages(() => { }, webPage.sourceUrl);
+        await this.imageCollector.fetchImages(() => { }, webPage.sourceUrl, webPage);
         this.updateLoadState(webPage);
     }
 

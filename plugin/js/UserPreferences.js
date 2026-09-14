@@ -111,6 +111,7 @@ class UserPreferences { // eslint-disable-line no-unused-vars
         this.manualDelayPerChapter = this.addPreference("manualDelayPerChapter", "manualDelayPerChapterTag", "0");
         this.overrideMinimumDelay = this.addPreference("overrideMinimumDelay", "overrideMinimumDelayCheckbox", false);
         this.skipImages = this.addPreference("skipImages", "skipImagesCheckbox", false);
+        this.rateLimitImages = this.addPreference("rateLimitImages", "rateLimitImagesCheckbox", false);
         this.compressImages = this.addPreference("compressImages", "compressImagesCheckbox", false);
         this.compressImagesAnimated = this.addPreference("compressImagesAnimated", "compressImagesAnimatedCheckbox", true);
         this.compressImagesJpgCover = this.addPreference("compressImagesJpgCover", "compressImagesJpgCoverCheckbox", false);
