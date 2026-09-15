@@ -28,8 +28,8 @@ class AliceswParser extends Parser {
         return [...genres, ...tags].map(e => e.textContent).join(", ");
     }
 
-    findContent(/*dom*/) {
-        //return dom.querySelector(".read-content");
+    findContent(dom) {
+        return dom.querySelector(".read-content");
     }
 
     findChapterTitle(dom) {
