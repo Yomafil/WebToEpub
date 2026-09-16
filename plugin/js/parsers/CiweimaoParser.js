@@ -12,6 +12,15 @@ class CiweimaoParser extends Parser {
         // Will break if `maxSimultanousFetchSize` is changed. A Map might be better.
         this.chapterFetchAttempt = 0;
         this.retryRateLimit = 0;
+        this.retryAmount = 10;
+    }
+
+    populateUIImpl() {
+        document.getElementById("failOnFailedChapterContentFetchRow").hidden = false;
+    }
+
+    isFailOnFailedChapterContentFetch() {
+        return document.getElementById("failOnFailedChapterContentFetchCheckbox").value;
     }
 
     async getChapterUrls(dom) {
@@ -280,13 +289,21 @@ class CiweimaoParser extends Parser {
             this.chapterFetchAttempt = 0;
             this.retryRateLimit = 0;
         } else {
-            if (this.chapterFetchAttempt < 5) {
+            if (this.chapterFetchAttempt < this.retryAmount) {
                 this.chapterFetchAttempt += 1;
                 this.retryRateLimit += this.minimumThrottle;
                 await util.sleep(this.retryRateLimit);
                 return this.fetchChapter(url);
             }
             else {
+                let errorMsg = new Error("Chapter content couldn't be loaded for chapter: " + url + "\n");
+                if (this.isFailOnFailedChapterContentFetch()) {
+                    throw new Error(errorMsg);
+                }
+                else {
+                    ErrorLog.log(errorMsg);
+                }
+
                 const p = newDoc.dom.createElement("p");
                 p.textContent = `Chapter content couldn't be loaded.\n\n chapter content: ${json.chapter_content}\n encryption keys: ${json.encryt_keys}\n access key: ${json.chapter_access_key}`;
                 newDoc.content.appendChild(p);

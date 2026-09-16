@@ -423,6 +423,10 @@
 		"message": "Password",
 		"description": "Label for textbox to collect password needed for site"
 	},
+	"__MSG_label_Fail_On_Failed_Chapter_Content_Fetch__": {
+		"message": "Fail when failing to fetch chapter content",
+		"description": "Label for fail on failed chapter content fetch for CiweimaoParser."
+	},
 	"__MSG_label_Range_End_Chapter__": {
 		"message": "Last Chapter",
 		"description": "Label in front of drop down for selecting last chapter to include in epub"
